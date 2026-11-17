@@ -23,6 +23,69 @@
 > Anyone else holding a clone needs `git remote set-url` as well; their pushes
 > will keep working on the redirect only until it lapses.
 
+## The Cloudflare deploy is broken (found 2026-11-18, after the merge)
+
+Pushing `main` triggered a build that **failed**, so none of this session is live
+yet. The site itself is unharmed — Cloudflare keeps the last good deployment —
+but `/service/breathwork/` and `/insurance/bupa/` return 404 in production, and
+`/service/womens-health/` still serves its pre-edit copy.
+
+The build log shows three steps: clone, `npm clean-install`, then
+**`npx wrangler deploy`**. There is no build step, and the deploy fails with:
+
+```
+The entry-point file at "@astrojs/cloudflare/entrypoints/server" was not found.
+```
+
+**Nothing in this session caused it.** `package.json`'s `build` and `deploy` scripts
+are byte-identical to the previous `main`, and `wrangler.jsonc` has not changed
+since long before today. The likely trigger is the repository rename: moving to
+`hmdgai/balance-physio` means reconnecting the Git integration, and a reconnect
+is where a build command gets dropped.
+
+### Why there is no fix in this repository
+
+The obvious repo-side fix — declaring the build in `wrangler.jsonc` — **was tried
+here and does not work**:
+
+```jsonc
+"build": { "command": "npm run build" }   // does NOT work
+```
+
+Wrangler runs the build, then rejects the config anyway:
+
+```
+The expected output file at "@astrojs/cloudflare/entrypoints/server" was not
+found after running custom build: npm run build.
+```
+
+The reason is how the adapter works. **The root `wrangler.jsonc` is input, not the
+config that gets deployed.** `astro build` reads it and emits the real one at
+`dist/server/wrangler.json` — `main: entry.mjs`, assets `../client` — plus a
+redirect at `.wrangler/deploy/config.json` pointing wrangler at it. Both are
+gitignored, so a fresh clone has neither. With a custom build declared, wrangler
+resolves and validates the ROOT config *before* that redirect exists, and `main`
+there is a package specifier rather than a file on disk.
+
+Verified from a simulated fresh clone (`dist/` and `.wrangler/deploy` removed): the
+custom-build version fails as above, while a plain `wrangler deploy --dry-run`
+**succeeds** once `npm run build` has run — 2005 assets read, all three bindings
+resolved, 1448 KiB total.
+
+### The fix — Cloudflare dashboard, not possible from here
+
+Workers & Pages → `balancephysio` → Settings → Build, then either:
+
+| Field | Set to |
+| --- | --- |
+| Build command | `npm run build` (leave the deploy command as `npx wrangler deploy`) |
+| *or* Deploy command | `npm run deploy` — which is already `npm run build && wrangler deploy` |
+
+> **`wrangler deploy` must never run without `astro build` first.** The entry point
+> and the deploy config are both build output, and both are gitignored. The
+> repo's own `deploy` script has always done this correctly; only the Cloudflare
+> project settings disagree.
+
 ## Objective
 
 Three Intercom tickets, worked in one session:

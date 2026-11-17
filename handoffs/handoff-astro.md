@@ -448,6 +448,24 @@ The first three must also exist in Cloudflare → Workers & Pages → `balanceph
 
 ### Deployment
 
+> **`wrangler deploy` must never run without `astro build` first.** The worker
+> entry point and the deploy config are **both build output and both
+> gitignored**: `astro build` reads the root `wrangler.jsonc` and emits the real
+> config at `dist/server/wrangler.json` (`main: entry.mjs`, assets `../client`),
+> plus a redirect at `.wrangler/deploy/config.json`. A fresh clone has neither,
+> so a bare `wrangler deploy` fails with *"The entry-point file at
+> @astrojs/cloudflare/entrypoints/server was not found"*.
+>
+> This cannot be fixed in the repo. Adding `"build": {"command": "npm run build"}`
+> to `wrangler.jsonc` **does not work** — wrangler validates the root config,
+> where `main` is a package specifier rather than a file, before the redirect
+> exists. Tried and rejected on 2026-11-18; see that day's log.
+>
+> The Cloudflare project must therefore run `npm run build` as its build command,
+> or `npm run deploy` as its deploy command. **It broke on 2026-11-18**, most
+> likely when the Git integration was reconnected after the repository was
+> renamed to `hmdgai/balance-physio`.
+
 Push to `main` → Cloudflare builds and deploys. Publishing in Sanity triggers the same build through a webhook → deploy hook.
 
 The deploy hook URL is **not recorded in this repo** — it is an unauthenticated secret. Find it in the Cloudflare dashboard. It was previously committed in `docs/deployment.md`, so **it should be rotated.**
