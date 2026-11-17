@@ -3,10 +3,25 @@
 | Field | Value |
 | --- | --- |
 | **Date** | 2026-11-17 |
-| **GitHub username** | Unknown. `git config user.name` is `Dave` (`dave@hmdg.co.uk`); the remote `https://github.com/hannah639/balance-physio.git` is owned by `hannah639`. Neither is confirmed to be the committing GitHub account. |
+| **GitHub username** | Unknown. `git config user.name` is `Dave` (`dave@hmdg.co.uk`); the remote `https://github.com/hmdgai/balance-physio.git` is owned by `hmdgai`. Neither is confirmed to be the committing GitHub account. |
 | **AI agent used** | Claude Code (Opus 5, 1M context) |
-| **Repository** | `hannah639/balance-physio` |
+| **Repository** | `hmdgai/balance-physio` |
 | **Branch** | `updates-nov-17-26`, cut from `main` at `ca64fcf` |
+
+> **The GitHub repository was renamed during this session.** Pushing printed
+> `This repository moved. Please use the new location:
+> https://github.com/hmdgai/balance-physio.git`. The push succeeded on GitHub’s
+> redirect, and `origin` was then re-pointed at the new URL; a later `git fetch`
+> came back with no redirect notice, confirming it is canonical.
+>
+> The master handoff, this log, `README.md`, `PROJECT_HANDOVER.md` and the two
+> files in `docs/` were updated to the new name, because those hand someone a
+> clone URL or an access checklist. **The dated logs from September and October
+> were deliberately left alone** — they record what was true on the day they
+> were written, and the repository really was at the old name then.
+>
+> Anyone else holding a clone needs `git remote set-url` as well; their pushes
+> will keep working on the redirect only until it lapses.
 
 ## Objective
 

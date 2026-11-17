@@ -11,7 +11,7 @@ A website for Balance Performance Physiotherapy in Clapham, London. Built with A
 | What | Where |
 |---|---|
 | Live site | https://balance-physio.hannah-9e0.workers.dev/ |
-| Code | https://github.com/hannah639/balance-physio |
+| Code | https://github.com/hmdgai/balance-physio |
 | Hosting | Cloudflare Workers & Pages |
 | CMS Studio | https://balance-physio.sanity.studio |
 | Booking system | https://go.mindbodyonline.com/book/widgets/appointments/view/8068777f5e/services |

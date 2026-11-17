@@ -7,7 +7,7 @@ The companion document for the CMS is `handoffs/handoff-sanity.md` in the **bala
 | | |
 | --- | --- |
 | Last verified | 28 July 2026 |
-| Repository | `hannah639/balance-physio`, branch `main` |
+| Repository | `hmdgai/balance-physio`, branch `main` |
 | Framework | Astro 6.1.7, static output |
 | Adapter | `@astrojs/cloudflare` 13.2.1 |
 | Local | http://localhost:4321 |

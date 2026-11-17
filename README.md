@@ -7,7 +7,7 @@ Built with [Astro](https://astro.build) + [Cloudflare Workers](https://developer
 ## Quick start
 
 ```bash
-git clone https://github.com/hannah639/balance-physio.git balancephysio
+git clone https://github.com/hmdgai/balance-physio.git balancephysio
 cd balancephysio
 npm install
 npm run dev

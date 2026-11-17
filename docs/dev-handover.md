@@ -6,7 +6,7 @@
 
 Ask the project owner for:
 
-1. **GitHub** — collaborator access on `hannah639/balance-physio`
+1. **GitHub** — collaborator access on `hmdgai/balance-physio`
 2. **Cloudflare** — team member invite to the Balance Physio project (so you can view builds and the deploy hook URL)
 3. **Sanity** — member invite to the `balance-physio` project (project ID `da13xw8y`)
 
@@ -30,7 +30,7 @@ git --version
 ## Step 3 — Clone and run locally
 
 ```bash
-git clone https://github.com/hannah639/balance-physio.git
+git clone https://github.com/hmdgai/balance-physio.git
 cd balance-physio
 npm install
 npm run dev

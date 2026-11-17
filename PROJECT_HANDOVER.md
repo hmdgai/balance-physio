@@ -9,7 +9,7 @@ A complete reference for everyone involved with the Balance Physio website. Skim
 - **Live site:** https://balancephysio.com
 - **Staging URL:** https://balance-physio.hannah-9e0.workers.dev
 - **Built with:** Astro (static site generator) + Cloudflare Workers (hosting)
-- **Repository:** https://github.com/hannah639/balance-physio (private)
+- **Repository:** https://github.com/hmdgai/balance-physio (private)
 - **Auto-deploys:** every `git push` to `main` triggers a Cloudflare build and goes live in ~90 seconds
 - **CMS:** None active. All content lives in code (Astro files + JS data files). Sanity Studio was wired up early on but disconnected — the site reads from `src/data/site-settings.js` instead.
 
@@ -73,7 +73,7 @@ There's a `News` page at https://balancephysio.com/news for team achievements (m
 
 ### Step 1 — Get access
 You need:
-1. **GitHub** — collaborator access on `hannah639/balance-physio`
+1. **GitHub** — collaborator access on `hmdgai/balance-physio`
 2. **Cloudflare** — team member invite to the Balance Physio worker (so you can see deploy logs and manage the domain)
 
 GitHub alone gets you contributing code. Cloudflare is for debugging deploy failures and DNS.
@@ -92,7 +92,7 @@ git --version
 
 ### Step 3 — Clone the repo
 ```bash
-git clone https://github.com/hannah639/balance-physio.git
+git clone https://github.com/hmdgai/balance-physio.git
 cd balance-physio
 npm install
 ```
