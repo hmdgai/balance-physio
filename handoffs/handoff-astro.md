@@ -60,7 +60,7 @@ src/
     team/[slug]     35 generated profiles
     who-we-help/    10 generated audience pages
     robots.txt.ts · sitemap.xml.ts · api/seo/sitemaps.json.ts
-  components/       25 components (see §5)
+  components/       26 components (see §5)
   layouts/
     Layout.astro    the ONE layout: head + header + .bp-page + footer + global CSS
   lib/
@@ -150,7 +150,7 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 
 ## 5. Components
 
-25 components in `src/components/`. All are `.astro` — **there are no framework islands and no client-side hydration anywhere.** The only JavaScript shipped is a handful of inline `<script is:inline>` blocks for the video lightbox, FAQ accordions and the activities slider.
+26 components in `src/components/`. All are `.astro` — **there are no framework islands and no client-side hydration anywhere.** The only JavaScript shipped is a handful of inline `<script is:inline>` blocks for the video lightbox, FAQ accordions and the activities slider.
 
 | Component | Purpose | Data source | Reusable |
 | --- | --- | --- | --- |
@@ -161,8 +161,9 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 | `PageHero` | Internal page hero. Renders `highlight` + `title` — **highlight comes FIRST**, in orange. | props | Yes |
 | `ImageText` | Image-and-text band. Supports `reverse`, `altBg`, `collage`, `imageAspect`, `youtubeId`. | props | Yes — the workhorse |
 | `RichText` | Portable Text renderer: headings, lists, quotes, links, strong/em/code, `<br>`, body images. | props (`blocks`) | Yes |
-| `RichTextSpans` | Inline span renderer used by RichText. | props | Internal |
+| `RichTextSpans` | Inline span renderer used by RichText. A linked span **keeps its `strong` / `em` marks** — it used to render a bare `<a>` and silently drop the bold. | props | Internal |
 | `ServicePage` | Wrapper for the 3 services using the intro/when/how/who shape. Takes a `sections` array. | `services` | Limited |
+| `ContentSections` | Renders CMS content sections with the image **optional**: a section with an image gets `<ImageText>`, a section without one gets a single-column prose band instead of a grey "Image placeholder" tile. Adding an image in Sanity restores the two-column layout with no code change. Also renders `ctaLabel`/`ctaUrl`. | props (`sections`) | Yes — Breathwork + 6 insurance pages |
 | `ConditionPage` | Renders an entire condition document. Takes `doc`, not ~20 props. | `requireCondition()` | Yes — all 19 |
 | `BlogCard` | News grid card. | props | Yes |
 | `BlogGrid` | News grid + pagination. | props | Yes |
@@ -186,7 +187,7 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 
 ## 6. Routes
 
-67 route files. Every one reads from Sanity.
+75 route files. Every one reads from Sanity.
 
 | Route | File | Layout | Sanity source |
 | --- | --- | --- | --- |
@@ -195,6 +196,13 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 | `/clinic/clapham-south-hydrotherapy/` | `clinic/clapham-south-hydrotherapy.astro` | Layout | `clinics`, `getClinic` |
 | `/clinic/clapham/` | `clinic/clapham.astro` | Layout | `clinics`, `getClinic` |
 | `/condition/acl-knee-specialist-london/` | `condition/acl-knee-specialist-london.astro` | ConditionPage | `conditions`, `requireCondition` |
+| `/insurance/` | `insurance/index.astro` | ContentSections + card grid | `pageContent`, `pages` (slug `insurance`) + `insurance` |
+| `/insurance/aviva/` | `insurance/aviva.astro` | ContentSections | `pageContent`, `insurance` |
+| `/insurance/axa/` | `insurance/axa.astro` | ContentSections | `pageContent`, `insurance` |
+| `/insurance/bupa/` | `insurance/bupa.astro` | ContentSections | `pageContent`, `insurance` |
+| `/insurance/cigna/` | `insurance/cigna.astro` | ContentSections | `pageContent`, `insurance` |
+| `/insurance/vitality/` | `insurance/vitality.astro` | ContentSections | `pageContent`, `insurance` |
+| `/insurance/wpa/` | `insurance/wpa.astro` | ContentSections | `pageContent`, `insurance` |
 | `/condition/ankle-pain/` | `condition/ankle-pain.astro` | ConditionPage | `conditions`, `requireCondition` |
 | `/condition/balance-and-dizziness/` | `condition/balance-and-dizziness.astro` | ConditionPage | `conditions`, `requireCondition` |
 | `/condition/childrens-neurological-developmental/` | `condition/childrens-neurological-developmental.astro` | ConditionPage | `conditions`, `requireCondition` |
@@ -227,6 +235,7 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 | `/pricing/` | `pricing.astro` | Layout | `getGlobals`, `getPricing`, `globals`, `pricing` |
 | `/privacy-policy/` | `privacy-policy.astro` | Layout | `pageContent`, `pages` |
 | `/service/alterg-anti-gravity-treadmill-london/` | `service/alterg-anti-gravity-treadmill-london.astro` | Layout | `getGlobals`, `globals`, `pageContent`, `services` |
+| `/service/breathwork/` | `service/breathwork.astro` | ContentSections | `pageContent`, `services` |
 | `/service/bike-fitting-cycling-analysis/` | `service/bike-fitting-cycling-analysis.astro` | Layout | `getGlobals`, `globals`, `pageContent`, `services` |
 | `/service/ergonomics/` | `service/ergonomics.astro` | Layout | `getGlobals`, `globals`, `pageContent`, `services` |
 | `/service/hydrotherapy/` | `service/hydrotherapy.astro` | Layout | `getGlobals`, `globals`, `pageContent`, `services` |
@@ -267,7 +276,7 @@ Stick to these four. A fifth arbitrary breakpoint makes the system harder to rea
 | `/news/<slug>/` | `getStaticPaths` → `getBlogPosts()` | Page, grid card, sitemap entry and related links disappear |
 | `/news/page/<n>/` | Post count ÷ `PAGE_SIZE` (9) | Fewer pages |
 
-The 24 service and 19 condition pages are **static files**, one per document, not a dynamic route. They keep bespoke per-page markup that a single template could not express.
+The 25 service, 19 condition and 6 insurance pages are **static files**, one per document, not a dynamic route. They keep bespoke per-page markup that a single template could not express — and, for the insurance pages, it is what keeps the sitemap honest, since `getStaticRoutes()` globs the route files rather than the CMS.
 
 > **Why `/news/page/<n>/` and not `/news/<n>/`:** a catch-all directly under `/news/` would also match post slugs, and the two routes would collide.
 
@@ -289,7 +298,7 @@ The 24 service and 19 condition pages are **static files**, one per document, no
 | `client.ts` | `sanityClient`, `isSanityConfigured`, `urlFor` | **Token-less by design.** Referencing `SANITY_API_READ_TOKEN` would inline it into the server bundle. The dataset is public. Imports `@sanity/image-url` through its **named** `createImageUrlBuilder` export — the package's default export is deprecated as of 2.1.1 and warned on every dev start and build until 2026-09-10. |
 | `queries.ts` | All GROQ | Single home for every query. Explicit projections — no `...` spreads. |
 | `globals.ts` | `getGlobals()` | siteSettings + seoSettings + navigation + bookingLinks in ONE query. Never throws; falls back to `data/site-settings.js`. |
-| `pageContent.ts` | `pages`, `services`, `whoWeHelp`, `toBodyBlocks`, types | `makeLoader()` gives each `.all` / `.bySlug` / `.required` / `.routes`. |
+| `pageContent.ts` | `pages`, `services`, `whoWeHelp`, `insurance`, `toBodyBlocks`, types | `makeLoader()` gives each `.all` / `.bySlug` / `.required` / `.routes`. |
 | `conditions.ts` | `getConditions`, `requireCondition` | Named-field model, not `sections`. |
 | `homepage.ts` | `getHomepage`, `requireHomepage` | Read by 9 sibling components; memoised to one request. |
 | `blog.ts` | `getBlogPosts`, `getBlogPost`, `getAdjacentPosts`, `getBlogCategories` | Related posts fall back category → recent. Prev/next derive from the same list as the grid. |
@@ -298,8 +307,8 @@ The 24 service and 19 condition pages are **static files**, one per document, no
 | `faqs.ts` | `getGeneralFaqsRequired`, `answerToText` | `answerToText` flattens Portable Text for FAQPage JSON-LD. |
 | `pricing.ts` | `getPricing` | Falls back to `data/pricing.js`. |
 | `navigation.ts` | `resolveNavigation` | Falls back to `data/navigation-fallback.ts`. |
-| `routes.ts` | `resolveHref`, `ROUTE_PREFIX`, `FIXED_ROUTES` | **The only place that knows the URL structure.** Takes a whole document, not `(type, slug)`. |
-| `specialisms.ts` | `resolveSpecialism`, `resolveSpecialisms` | Links a team member's free-text `specialistAreas` label to the condition or service page covering it. Label → slug, slug → href via `resolveHref`. Slugs are checked against the **route files** (`import.meta.glob`), not the CMS, so a label cannot link to a 404. Resolution order: a 9-entry alias table for genuine title/slug rewordings, then the literal slug, then the slug with the connecting `and` removed — the site has both `/condition/balance-and-dizziness/` and `/service/strength-conditioning/`. Covers **26 of the roster’s 27 labels** (2026-09-10); the 27th, `Breathwork`, has no page and renders as plain text, which is the designed fallback. An alias pointing at a missing route **fails the build**; an unmatched label does not. |
+| `routes.ts` | `resolveHref`, `ROUTE_PREFIX`, `FIXED_ROUTES` | **The only place that knows the URL structure.** Takes a whole document, not `(type, slug)`. **A document's `_type` is what picks its URL prefix** — this is why the insurer pages needed their own `insurance` type rather than reusing `service`, which would have resolved every footer link to `/service/bupa/`. |
+| `specialisms.ts` | `resolveSpecialism`, `resolveSpecialisms` | Links a team member's free-text `specialistAreas` label to the condition or service page covering it. Label → slug, slug → href via `resolveHref`. Slugs are checked against the **route files** (`import.meta.glob`), not the CMS, so a label cannot link to a 404. Resolution order: a 9-entry alias table for genuine title/slug rewordings, then the literal slug, then the slug with the connecting `and` removed — the site has both `/condition/balance-and-dizziness/` and `/service/strength-conditioning/`. The alias table now also maps the individually-named pelvic health symptoms (`Bladder leakage`, `Stress incontinence`, `Prolapse`, `Menopause`, `Sexual dysfunction`) to `/condition/womens-pelvic-health/`, which covers them all. As of 2026-11-17 `Breathwork` **does** have a page, so it resolves automatically and every roster label now links. An alias pointing at a missing route **fails the build**; an unmatched label does not. A specialism may also carry an optional **`logo`** (the `LOGOS` table — currently The Mummy MOT alone), rendered inside the pill next to the label, decorative `alt=""` since the label already names it. |
 | `seo.ts` | `getSitemapEntries`, `absoluteUrl` | Sitemap sources must match the sources that generate pages. |
 | `blogPaging.ts` | `PAGE_SIZE` | Declared once so grid and routes agree. |
 | `types.ts` | Shared types |  |
@@ -488,7 +497,15 @@ The deploy hook URL is **not recorded in this repo** — it is an unauthenticate
 
 ## 15. Current state and known issues
 
-**Complete:** every page renders from Sanity — homepage, 24 services, 19 conditions, 15 pages, 10 who-we-help, 2 clinics, 35 team profiles, 7 blog posts, FAQs, pricing, navigation, SEO, sitemap, robots.
+**Outstanding — the `insurance` Studio schema.** The six `/insurance/<slug>/`
+pages build, render and are linked from the footer, but the `insurance`
+document type is **not declared in `balance-physio-sanity`**, so nobody can
+edit them in the Studio yet. Sanity's API is schemaless, which is why the
+documents exist and the site reads them regardless. The ready-to-paste schema
+is in `handoffs/handoff-astro-2026-11-17.md`. This is the one place in the
+project where the four coordinated edits stand at three of four.
+
+**Complete:** every page renders from Sanity — homepage, 25 services, 19 conditions, 6 insurance + their landing page, 16 pages, 10 who-we-help, 2 clinics, 35 team profiles, 9 blog posts, FAQs, pricing, navigation, SEO, sitemap, robots.
 
 | Issue | Detail |
 | --- | --- |

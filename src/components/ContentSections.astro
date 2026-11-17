@@ -1,0 +1,95 @@
+---
+/**
+ * Renders a page's CMS content sections, image optional.
+ *
+ * The service-page scaffold assumes every section has a photograph and hands
+ * ImageText a grey "Image placeholder" tile when one is missing. That is fine
+ * for a single gap on an otherwise illustrated page, but the insurer pages
+ * carry no photography at all and Breathwork is waiting on its three stock
+ * images — rendering those through the usual scaffold would have published
+ * seven pages made mostly of placeholder boxes.
+ *
+ * So: a section WITH an image renders exactly as it always has, and a section
+ * WITHOUT one renders as a single-column prose band instead of a half-empty
+ * two-column grid. Dropping an image into the section in Sanity switches that
+ * section back to the two-column layout on the next build, with no code change.
+ *
+ * The band reuses .image-text / .image-text-content from Layout.astro rather
+ * than restating its padding, background and typography, so it cannot drift
+ * away from the rest of the site and introduces no literal colours.
+ */
+import ImageText from './ImageText.astro';
+import RichText from './RichText.astro';
+import { getGlobals } from '../lib/sanity/globals';
+import type { PageSection } from '../lib/sanity/pageContent';
+
+const { sections = [] } = Astro.props as { sections?: PageSection[] };
+
+// Section CTAs default to the booking link, matching the service pages. A
+// section carrying a ctaLabel must render a button wherever it appears — an
+// editor who sets the field and sees nothing has no way to tell that this
+// template, rather than their text, is at fault.
+const bookingUrl = (await getGlobals()).bookingUrl;
+---
+{sections.map((section, i) => (
+	section.image ? (
+		<div class={i === 0 ? 'service-intro' : undefined}>
+			<ImageText
+				eyebrow={section.eyebrow ?? undefined}
+				heading={section.heading ?? undefined}
+				highlight={section.headingHighlight ?? undefined}
+				reverse={section.imageOnRight}
+				altBg={section.altBackground}
+				image={section.image.url}
+				imageAlt={section.image.alt}
+			>
+				<RichText blocks={section.blocks} />
+				{section.ctaLabel && (
+					<p><a
+						href={section.ctaUrl ?? bookingUrl}
+						class="btn-primary"
+						target={section.ctaUrl ? undefined : '_blank'}
+						rel={section.ctaUrl ? undefined : 'noopener'}
+					>{section.ctaLabel}</a></p>
+				)}
+			</ImageText>
+		</div>
+	) : (
+		<section class:list={['image-text', 'content-band', section.altBackground && 'alt-bg']}>
+			<div class="image-text-inner">
+				<div class="image-text-content">
+					{section.eyebrow && <div class="eyebrow">{section.eyebrow}</div>}
+					{section.heading && (
+						<h2>
+							{section.headingHighlight
+								? <>{section.heading}{' '}<span class="highlight">{section.headingHighlight}</span></>
+								: section.heading}
+						</h2>
+					)}
+					<RichText blocks={section.blocks} />
+					{section.ctaLabel && (
+						<p><a
+							href={section.ctaUrl ?? bookingUrl}
+							class="btn-primary"
+							target={section.ctaUrl ? undefined : '_blank'}
+							rel={section.ctaUrl ? undefined : 'noopener'}
+						>{section.ctaLabel}</a></p>
+					)}
+				</div>
+			</div>
+		</section>
+	)
+))}
+
+<style>
+	/*
+	  One column instead of two, and a measure that stays readable now the text
+	  is no longer sharing the row with a photograph. Everything else — padding,
+	  the alt-bg gradient, heading sizes, the orange tick bullets — is inherited
+	  from the .image-text rules in Layout.astro.
+	*/
+	.content-band :global(.image-text-inner) {
+		grid-template-columns: 1fr;
+		max-width: 860px;
+	}
+</style>

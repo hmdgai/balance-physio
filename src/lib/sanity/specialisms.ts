@@ -56,10 +56,34 @@ const ALIASES: Record<string, {type: 'condition' | 'service'; slug: string}> = {
 	// "Knee & ACL Injuries Treatment in Clapham" at /condition/acl-knee-specialist-london/.
 	'knee pain': {type: 'condition', slug: 'acl-knee-specialist-london'},
 	'knee injuries and acl': {type: 'condition', slug: 'acl-knee-specialist-london'},
+	// Pelvic health symptoms named individually. Each is covered by the
+	// Women's Pelvic Health page rather than having a page of its own, so
+	// without these they would render as plain text on Jo Fordyce's profile.
+	'bladder leakage': {type: 'condition', slug: 'womens-pelvic-health'},
+	'stress incontinence': {type: 'condition', slug: 'womens-pelvic-health'},
+	prolapse: {type: 'condition', slug: 'womens-pelvic-health'},
+	menopause: {type: 'condition', slug: 'womens-pelvic-health'},
+	'sexual dysfunction': {type: 'condition', slug: 'womens-pelvic-health'},
 	// The service page leads on the clinic location, which no label will contain.
 	'soft tissue and sports massage': {type: 'service', slug: 'sports-massage-clapham-soft-tissue-therapy'},
 	'sports massage': {type: 'service', slug: 'sports-massage-clapham-soft-tissue-therapy'},
 	'soft tissue therapy': {type: 'service', slug: 'sports-massage-clapham-soft-tissue-therapy'},
+}
+
+/**
+ * Specialisms that carry a recognisable third-party mark.
+ *
+ * Only for brands a patient actively looks for — The Mummy MOT is the one the
+ * clinic was asked to show, because new mothers recognise the logo before they
+ * recognise the words. The logo is rendered INSIDE the pill next to the label,
+ * not instead of it, so the specialism still reads as text and the image stays
+ * decorative (`alt=""`) rather than repeating the label to a screen reader.
+ *
+ * Paths are local files in /public with .avif and .webp siblings, as
+ * <Picture> requires.
+ */
+const LOGOS: Record<string, {src: string; width: number; height: number}> = {
+	'mummy mot': {src: '/mummy-mot/mummy-mot-logo.jpg', width: 800, height: 364},
 }
 
 /** Lowercase, drop apostrophes and punctuation, collapse whitespace. */
@@ -100,6 +124,11 @@ export type Specialism = {
 	label: string
 	/** The page it covers, or null when no page does. */
 	href: string | null
+	/**
+	 * A brand mark to show alongside the label, or null for the great
+	 * majority that have none. See LOGOS above.
+	 */
+	logo: {src: string; width: number; height: number} | null
 }
 
 /**
@@ -112,9 +141,12 @@ export type Specialism = {
  */
 export function resolveSpecialism(rawLabel: string): Specialism {
 	const label = rawLabel.trim()
-	if (!label) return {label, href: null}
+	if (!label) return {label, href: null, logo: null}
 
-	const alias = ALIASES[normalise(label)]
+	const key = normalise(label)
+	const logo = LOGOS[key] ?? null
+
+	const alias = ALIASES[key]
 	if (alias) {
 		const known = alias.type === 'condition' ? CONDITION_SLUGS : SERVICE_SLUGS
 		if (!known.has(alias.slug)) {
@@ -124,16 +156,16 @@ export function resolveSpecialism(rawLabel: string): Specialism {
 					`Fix the slug in src/lib/sanity/specialisms.ts.`,
 			)
 		}
-		return {label, href: resolveHref({_type: alias.type, slug: alias.slug})}
+		return {label, href: resolveHref({_type: alias.type, slug: alias.slug}), logo}
 	}
 
 	for (const slug of slugCandidates(label)) {
-		if (CONDITION_SLUGS.has(slug)) return {label, href: resolveHref({_type: 'condition', slug})}
-		if (SERVICE_SLUGS.has(slug)) return {label, href: resolveHref({_type: 'service', slug})}
+		if (CONDITION_SLUGS.has(slug)) return {label, href: resolveHref({_type: 'condition', slug}), logo}
+		if (SERVICE_SLUGS.has(slug)) return {label, href: resolveHref({_type: 'service', slug}), logo}
 	}
 
 	// No page covers this label. Rendered as plain text by the template.
-	return {label, href: null}
+	return {label, href: null, logo}
 }
 
 /** Resolve a whole `specialistAreas` array, dropping empty entries. */

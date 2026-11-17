@@ -1,0 +1,139 @@
+---
+/**
+ * /insurance/ — the landing page for the six insurer pages.
+ *
+ * Hero, intro copy and SEO come from Sanity -> Pages -> Insurance. That is an
+ * ordinary `page` document rather than a new singleton type: `page` resolves
+ * as /<slug>/, so a page with the slug "insurance" already lands on exactly
+ * this URL, and it is editable in the Studio today — unlike the six insurer
+ * documents, whose `insurance` type still has to be declared there.
+ *
+ * The insurer cards are built from the ROUTE FILES in this folder, not from
+ * the CMS. A document can exist without a page — the six insurer pages are
+ * static files, one per document — so listing the documents would eventually
+ * put a card on this page pointing at a 404. This is the same rule the sitemap
+ * and the specialism links follow: link from the source that generates the
+ * page.
+ */
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ContentSections from '../../components/ContentSections.astro';
+import BookingCTA from '../../components/BookingCTA.astro';
+import { pages, insurance } from '../../lib/sanity/pageContent';
+
+const doc = await pages.required('insurance');
+
+// Slugs that have a real page in this folder. Resolved by Vite at build time;
+// the modules are never imported, so nothing is added to the bundle.
+const routeSlugs = new Set(
+	Object.keys(import.meta.glob('/src/pages/insurance/*.astro'))
+		.map((path) => (path.split('/').pop() ?? '').replace(/\.astro$/, ''))
+		.filter((slug) => slug !== 'index'),
+);
+
+const docs = await insurance.all();
+
+// Ordered by the CMS display order, then filtered to what actually builds.
+const insurers = docs
+	.filter((d) => routeSlugs.has(d.slug))
+	.map((d) => ({
+		slug: d.slug,
+		// `breadcrumb` is the short name ("Bupa"); `title` is the full page
+		// heading ("Bupa Physiotherapy in Clapham"), too long for a card.
+		name: d.breadcrumb ?? d.title,
+		blurb: d.seoDescription ?? '',
+		href: `/insurance/${d.slug}/`,
+	}));
+
+// A landing page listing nothing would be worse than a build failure: it would
+// quietly replace a working page with an empty one.
+if (insurers.length === 0) {
+	throw new Error(
+		'[insurance] No insurer pages resolved — refusing to build /insurance/. ' +
+			'Every card would be missing. Check that the insurance documents are ' +
+			'published and that src/pages/insurance/<slug>.astro exists for each.',
+	);
+}
+---
+<Layout
+	title={doc.seoTitle ?? 'Insurance | Balance Performance Physiotherapy in Clapham'}
+	description={doc.seoDescription ?? 'We work with Bupa, AXA Health, Cigna, WPA, Vitality and Aviva. Check your cover, get your pre-authorisation and contact our Clapham team to book.'}
+>
+	<PageHero
+		title={doc.heroHeading}
+		highlight={doc.heroHighlight ?? undefined}
+		subtitle={doc.heroSubtitle ?? undefined}
+		breadcrumb={doc.breadcrumb ?? undefined}
+	/>
+
+	<ContentSections sections={doc.sections} />
+
+	<section class="insurers">
+		<div class="container">
+			<div class="section-header">
+				<h2>Insurers we <span class="highlight">work with</span></h2>
+			</div>
+			<ul class="insurer-grid">
+				{insurers.map((i) => (
+					<li class="insurer-card">
+						<h3><a href={i.href}>{i.name}</a></h3>
+						{i.blurb && <p>{i.blurb}</p>}
+						<span class="insurer-card-cue" aria-hidden="true">Read more &rarr;</span>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<BookingCTA />
+</Layout>
+
+<style>
+	.insurers { padding: 90px 0; background: var(--white); }
+	.insurer-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+	}
+	.insurer-card {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 28px;
+		background: var(--primary-bg);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+	}
+	.insurer-card:hover,
+	.insurer-card:focus-within {
+		border-color: var(--accent);
+		transform: translateY(-2px);
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+	}
+	.insurer-card h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
+	.insurer-card h3 a { color: var(--text); text-decoration: none; }
+	/*
+	  The whole card is the hit area, so the pointer and the keyboard agree:
+	  the <a> stays the only focusable thing and keeps the accessible name,
+	  rather than wrapping the card in a second link.
+	*/
+	.insurer-card h3 a::after { content: ''; position: absolute; inset: 0; }
+	.insurer-card:hover h3 a,
+	.insurer-card:focus-within h3 a { color: var(--accent); }
+	.insurer-card p { font-size: 15px; line-height: 1.7; color: var(--text-muted); margin: 0; }
+	.insurer-card-cue { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--accent); }
+
+	@media (max-width: 1000px) {
+		.insurer-grid { grid-template-columns: repeat(2, 1fr); }
+	}
+	@media (max-width: 640px) {
+		.insurers { padding: 60px 0; }
+		.insurer-grid { grid-template-columns: 1fr; gap: 16px; }
+		.insurer-card { padding: 22px; }
+	}
+</style>

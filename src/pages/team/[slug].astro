@@ -5,6 +5,7 @@ import BookingCTA from '../../components/BookingCTA.astro';
 import Picture from '../../components/Picture.astro';
 import { getTeam, initials, gradientFor } from '../../lib/sanity/team';
 import { resolveSpecialisms } from '../../lib/sanity/specialisms';
+import RichText from '../../components/RichText.astro';
 
 export async function getStaticPaths() {
 	// One route per published team member in Sanity. Unpublished members simply
@@ -59,12 +60,38 @@ const specialisms = resolveSpecialisms(member.specialistAreas);
 							<h3 class="bio-specialisms-title">Specialisms</h3>
 							<ul class="bio-specialisms-list">
 								{specialisms.map((s) => (
-									<li>{s.href ? <a href={s.href}>{s.label}</a> : <span>{s.label}</span>}</li>
+									<li>{s.href ? (
+										<a href={s.href} class={s.logo ? 'has-logo' : undefined}>
+											{/*
+											  Decorative: the label beside it already says
+											  "Mummy MOT", so alt="" avoids announcing it twice.
+											*/}
+											{s.logo && (
+												<Picture
+													src={s.logo.src}
+													alt=""
+													width={String(s.logo.width)}
+													height={String(s.logo.height)}
+													loading="lazy"
+													decoding="async"
+												/>
+											)}
+											{s.label}
+										</a>
+									) : <span>{s.label}</span>}</li>
 								))}
 							</ul>
 						</div>
 					)}
-					{member.bio ? (
+					{member.bioBlocks.length > 0 ? (
+						/*
+						  Portable Text, so links and emphasis written in the Studio
+						  render. RichText emits bare <p>, which the .bio-body p rule
+						  below already styles.
+						*/
+						<RichText blocks={member.bioBlocks} />
+					) : member.bio.length > 0 ? (
+						/* data/team.js fallback — plain strings, no formatting to keep. */
 						member.bio.map((p) => <p>{p}</p>)
 					) : (
 						<>
@@ -109,7 +136,18 @@ const specialisms = resolveSpecialisms(member.specialistAreas);
 	.bio-body .eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: #e87722; }
 	.bio-body h2 { font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 8px; }
 	.bio-role { font-size: 14px; color: #e87722; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px; }
-	.bio-body p { font-size: 17px; line-height: 1.8; color: #555555; margin-bottom: 18px; }
+	/* A full blank line between paragraphs: 32px against a 30.6px line box
+	   (17px x 1.8), so the gap reads as an empty line rather than as slightly
+	   loose text. Profile bios run to eight, ten, even seventeen paragraphs of
+	   unbroken prose with no subheadings to break them up, which is why they
+	   are spaced more generously than the 18px used elsewhere on the site.
+
+	   Done with margin rather than <br> tags: an empty <br> between blocks is
+	   not content, screen readers announce nothing for it, and it could not be
+	   produced from Portable Text anyway without putting blank paragraphs in
+	   the CMS. */
+	.bio-body p { font-size: 17px; line-height: 1.8; color: #555555; margin-bottom: 32px; }
+	.bio-body p:last-child { margin-bottom: 0; }
 
 	/* Credentials — the CMS holds one entry per line ("Ph.D, MCSP, SRP",
 	   "30+ Years of Experience"), so this is a list, not a paragraph. */
@@ -130,6 +168,16 @@ const specialisms = resolveSpecialisms(member.specialistAreas);
 	.bio-specialisms-list a:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--white); }
 	/* No page covers this specialism — plain text, deliberately not a link. */
 	.bio-specialisms-list span { color: var(--text-muted); }
+
+	/* A pill carrying a brand mark (The Mummy MOT). The logo is a JPG on its
+	   own light background, so this pill keeps its white fill on hover and
+	   signals the hover with the border and text colour instead — the orange
+	   fill used by the other pills would have framed the logo in a pale box. */
+	.bio-specialisms-list a.has-logo { display: inline-flex; align-items: center; gap: 8px; }
+	.bio-specialisms-list a.has-logo :global(picture),
+	.bio-specialisms-list a.has-logo :global(img) { display: block; height: 18px; width: auto; }
+	.bio-specialisms-list a.has-logo:hover,
+	.bio-specialisms-list a.has-logo:focus-visible { background: var(--white); border-color: var(--accent); color: var(--accent); }
 	.bio-body .inline-link { color: #3EBEDF; font-weight: 600; }
 	.bio-body .inline-link:hover { text-decoration: underline; }
 	@media (max-width: 900px) {

@@ -331,6 +331,18 @@ export const SERVICES_QUERY = `*[_type == "service" && coalesce(published, true)
 }`
 
 /**
+ * Insurer pages (/insurance/<slug>/).
+ *
+ * Same hero + content-section + FAQ shape as a service page, so it reuses
+ * PAGE_SHAPE and mapPageDoc untouched. No photoGallery: these are text pages
+ * and the marquee is not rendered on them.
+ */
+export const INSURANCE_QUERY = `*[_type == "insurance" && coalesce(published, true) == true]
+	| order(coalesce(displayOrder, 999) asc){${PAGE_SHAPE},
+	"faqs": faqs[]{_key, question, answer}
+}`
+
+/**
  * Condition detail pages (/condition/<slug>/).
  *
  * Four fixed blocks — intro · symptoms · treatment · who we help — each with

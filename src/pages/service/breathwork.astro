@@ -1,0 +1,60 @@
+---
+/**
+ * /service/breathwork/
+ *
+ * Body, hero and SEO all come from Sanity -> Service -> Breathwork, so this
+ * file is only the scaffold. `services.required()` throws when the document is
+ * missing rather than publishing an empty page.
+ *
+ * The photo marquee is rendered only when the document actually has gallery
+ * images. The three stock photographs named in the brief have not been
+ * supplied, so today it is skipped and the sections render as prose bands;
+ * adding the images in Sanity brings both back with no change here.
+ */
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import PhotoMarquee from '../../components/PhotoMarquee.astro';
+import ContentSections from '../../components/ContentSections.astro';
+import BookingCTA from '../../components/BookingCTA.astro';
+import RichText from '../../components/RichText.astro';
+import { services } from '../../lib/sanity/pageContent';
+
+const doc = await services.required('breathwork');
+
+const photos = doc.photoGallery.map((p) => ({ src: p.url, alt: p.alt }));
+const faqs = doc.faqs.map((f) => ({ q: f.question, a: f.answer }));
+---
+<Layout
+	title={doc.seoTitle ?? 'Breathwork Sessions in Clapham, London | Balance Physio'}
+	description={doc.seoDescription ?? 'Breathwork sessions in Clapham, SW4, with physiotherapist Jonathan Lewis. Build calmer, more adaptable breathing for everyday life, sleep and sport.'}
+>
+	<PageHero
+		title={doc.heroHeading}
+		highlight={doc.heroHighlight ?? undefined}
+		breadcrumb={doc.breadcrumb ?? undefined}
+	/>
+
+	{photos.length > 0 && (
+		<PhotoMarquee images={photos} heightPx={140} speedSeconds={45} />
+	)}
+
+	<ContentSections sections={doc.sections} />
+
+	{faqs.length > 0 && (
+		<section class="faq-section faq-section--alt">
+			<div class="container">
+				<div class="section-header"><h2>Breathwork FAQs</h2></div>
+				<div class="faq-list">
+					{faqs.map((item) => (
+						<details class="faq-item">
+							<summary>{item.q}</summary>
+							<div class="answer"><RichText blocks={item.a} /></div>
+						</details>
+					))}
+				</div>
+			</div>
+		</section>
+	)}
+
+	<BookingCTA />
+</Layout>

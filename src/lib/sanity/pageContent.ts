@@ -254,7 +254,7 @@ export function makeLoader(query: string, label: string) {
 	}
 }
 
-import {WHO_WE_HELP_QUERY, PAGES_QUERY, SERVICES_QUERY} from './queries'
+import {WHO_WE_HELP_QUERY, PAGES_QUERY, SERVICES_QUERY, INSURANCE_QUERY} from './queries'
 
 /** Who We Help audience pages. */
 export const whoWeHelp = makeLoader(WHO_WE_HELP_QUERY, 'who-we-help')
@@ -270,3 +270,12 @@ export const pages = makeLoader(PAGES_QUERY, 'pages')
 
 /** Service pages. */
 export const services = makeLoader(SERVICES_QUERY, 'service')
+
+/**
+ * Insurer pages (/insurance/<slug>/) — Bupa, AXA, Cigna, WPA, Vitality, Aviva.
+ *
+ * Each has a route file of its own, exactly like the service pages, so the
+ * sitemap (which globs the page files) and the pages themselves can never
+ * disagree about which insurers exist.
+ */
+export const insurance = makeLoader(INSURANCE_QUERY, 'insurance')

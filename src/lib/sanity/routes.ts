@@ -20,6 +20,11 @@ export const ROUTE_PREFIX: Record<string, string> = {
 	// page, and the established URL structure wins.
 	teamMember: '/team/',
 	blog: '/blog/',
+	// Insurer landing pages (/insurance/<slug>/). Their own type rather than
+	// reused `service` documents: the type is what decides the URL here, so
+	// filing them under "service" would have resolved every footer link to
+	// /service/bupa/ — six menu entries pointing at 404s.
+	insurance: '/insurance/',
 }
 
 /** Singletons live at a fixed path and have no slug. */

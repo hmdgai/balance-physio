@@ -38,12 +38,25 @@ const pieces = spans.map((span) => {
 ---
 {pieces.map((piece) => (
 	piece.href ? (
+		/*
+		  A linked span keeps its other decorators. Portable Text lets one span
+		  carry several marks at once, and the Women's/Men's Health pages do
+		  exactly that -- the bolded "Pregnancy:" label is also a link. Rendering
+		  the <a> alone silently dropped the bold, which looked like a styling
+		  bug in the CMS rather than a missing case here.
+		*/
 		<a
 			href={piece.href}
 			class="inline-link"
 			target={piece.external ? '_blank' : undefined}
 			rel={piece.external ? 'noopener' : undefined}
-		>{piece.parts.map((part, i) => (i > 0 ? [<br />, part] : part))}</a>
+		>{piece.strong ? (
+			<strong>{piece.parts.map((part, i) => (i > 0 ? [<br />, part] : part))}</strong>
+		) : piece.em ? (
+			<em>{piece.parts.map((part, i) => (i > 0 ? [<br />, part] : part))}</em>
+		) : (
+			piece.parts.map((part, i) => (i > 0 ? [<br />, part] : part))
+		)}</a>
 	) : piece.strong ? (
 		<strong>{piece.parts.map((part, i) => (i > 0 ? [<br />, part] : part))}</strong>
 	) : piece.em ? (

@@ -47,6 +47,26 @@
 /** @type {Event[]} */
 export const events = [
 	{
+		slug: 'acupuncture-and-cupping-cpd-january-2027',
+		date: '30 January 2027',
+		category: 'Upcoming Event',
+		headline: 'Acupuncture and Cupping CPD Update – 30 January 2027',
+		image: '/news/acupuncture-and-cupping-cpd-january-2027.jpg',
+		imageAlt:
+			'Acupuncture and Cupping CPD Update poster from the Steve Bailey Acupuncture Academy, headed Advancing Clinical Practice. Online lessons: immediate access upon registration. Workshop: 30th January 2027 at Balance Performance, London. Fees £125. A clinically focused update for clinicians already using acupuncture, covering lower back, neck and shoulder pain, headaches and tennis elbow, needling technique, point selection and dry cupping. Further information: info@stevebaileyacupuncture.com.',
+		imageWidth: 1414,
+		imageHeight: 2000,
+		imageFit: 'contain',
+		// The poster’s own paper colour, so the letterbox reads as part of it.
+		imageBackdrop: '#ffffff',
+		body: [
+			'A practical CPD course led by Steve Bailey, combining online learning with a hands-on workshop for clinicians already using acupuncture.',
+			'The course will cover evidence-informed acupuncture and dry cupping techniques for common musculoskeletal conditions, including back, neck and shoulder pain, headaches and tennis elbow. The practical workshop will focus on refining needling techniques, point selection and location, treatment planning and the safe and effective use of dry cupping.',
+			'Online learning: Immediate access upon registration. Practical workshop: 30 January 2027 at Balance Performance, London. Cost: £125.',
+			'A great opportunity to refresh clinical skills, develop confidence and enhance treatment approaches.',
+		],
+	},
+	{
 		slug: 'wellness-meet-the-team-october-2026',
 		date: 'Thursday 8 October 2026, 12pm–1pm',
 		category: 'Upcoming Event',
@@ -71,13 +91,15 @@ export const events = [
 		headline: 'Mulligan Manual Therapy Concept',
 		image: '/news/mulligan-manual-therapy-concept-2026.jpg',
 		imageAlt:
-			'Two Balance Performance Physiotherapy clinicians in navy club polo shirts, arms around each other’s shoulders and smiling at the camera after a Mulligan Concept training session, in front of a framed blue poster.',
-		imageWidth: 480,
-		imageHeight: 502,
+			'Balance Performance Physiotherapy clinicians Jarryd Ferreira and Patrick O’Leary in navy club polo shirts, arms around each other’s shoulders and smiling at the camera after a Mulligan Concept training session, in front of a framed blue poster.',
+		// Same photograph as before, re-exported from the full-resolution
+		// original supplied on 2026-11-17; the previous file was a 480x502 crop.
+		imageWidth: 1170,
+		imageHeight: 1224,
 		body: [
-			'Sam Stringer, Portia Morey, Jarryd Ferreira and Patrick O’Leary attended our last 2 Mulligans Manual Therapy Concept sessions.',
-			'We believe better care starts with continuous learning. Every year, Balance hosts official Mulligan Concept postgraduate training, bringing expert manual therapy instruction to our own physiotherapists as well as practitioners across the surrounding area.',
+			'At Balance we believe better care starts with continuous learning. Every year, Balance hosts official Mulligan Concept postgraduate training, bringing expert manual therapy instruction to our own physiotherapists as well as practitioners across the surrounding area. Jarryd and Patrick attended one of the events in September.',
 			'This commitment to advanced education directly benefits your recovery. The Mulligan Concept uses gentle, hands-on techniques synchronized with your own movements to unlock stiff, painful joints in real time. Whether you are dealing with spinal discomfort, shoulder stiffness, or a stubborn sports injury, our team’s regularly updated skills mean you receive precise, painless treatments designed to restore your movement immediately and get you back to daily life with confidence.',
+			'Our next Mulligan event is being held in March 2027.',
 		],
 	},
 	{
