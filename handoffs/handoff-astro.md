@@ -302,7 +302,7 @@ The 25 service, 19 condition and 6 insurance pages are **static files**, one per
 | `conditions.ts` | `getConditions`, `requireCondition` | Named-field model, not `sections`. |
 | `homepage.ts` | `getHomepage`, `requireHomepage` | Read by 9 sibling components; memoised to one request. |
 | `blog.ts` | `getBlogPosts`, `getBlogPost`, `getAdjacentPosts`, `getBlogCategories` | Related posts fall back category → recent. Prev/next derive from the same list as the grid. |
-| `team.ts` | `getTeam` | Falls back to `data/team.js`. |
+| `team.ts` | `getTeam` | Falls back to `data/team.js`. **Order comes from `displayOrder` and ties are undefined** — two members on the same number sort arbitrarily, differently between builds, with no error. Found on 2026-11-20 when three members shared 18; all 36 are now numbered 1–36. Keep them unique. |
 | `clinics.ts` | `getClinics`, `getClinic` | Contact details fall back to Site Settings. |
 | `faqs.ts` | `getGeneralFaqsRequired`, `answerToText` | `answerToText` flattens Portable Text for FAQPage JSON-LD. |
 | `pricing.ts` | `getPricing` | Falls back to `data/pricing.js`. |

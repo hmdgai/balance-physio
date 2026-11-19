@@ -11,6 +11,15 @@ import { pages } from '../lib/sanity/pageContent';
 // this file; see the completion notes for which pages are fully migrated.
 const doc = await pages.bySlug('news-events');
 
+/*
+  Index of the first past event, so the "Past events" heading can be rendered
+  immediately above it. Derived from the data rather than hard-coded to a
+  position, so re-ordering events.js or promoting a past event back to
+  upcoming moves the heading with it. -1 when nothing is marked past, in
+  which case no heading renders at all.
+*/
+const firstPastIndex = events.findIndex((item) => item.past === true);
+
 // Look up team members by slug so events can reference clinicians.
 const teamBySlug = Object.fromEntries(team.map((m) => [m.slug, m]));
 
@@ -53,6 +62,8 @@ function cliniciansFor(item) {
 						const clinicians = cliniciansFor(item);
 						const bottom = item.imageLayout === 'bottom';
 						return (
+						<>
+						{i === firstPastIndex && <h2 class="news-past-heading">Past events</h2>}
 						<article class={`news-card${bottom ? ' news-card--bottom' : (i % 2 === 1 ? ' news-card--reverse' : '')}`} id={item.slug}>
 							{item.image && !bottom && (
 								<div class={`news-photo${item.imageFit === 'contain' ? ' news-photo--contain' : ''}`} style={[
@@ -107,6 +118,7 @@ function cliniciansFor(item) {
 								</div>
 							)}
 						</article>
+						</>
 						);
 					})}
 				</div>
@@ -123,6 +135,21 @@ function cliniciansFor(item) {
 	.news-empty { text-align: center; font-size: 18px; color: #555; padding: 60px 0; }
 
 	.news-list { display: flex; flex-direction: column; gap: 56px; }
+	/*
+	  Divider between the upcoming events and the ones that have been and gone.
+	  Negative top margin pulls it closer to the card below than the 56px list
+	  gap would, so it reads as a label for that group rather than as a lone
+	  item floating between two cards.
+	*/
+	.news-past-heading {
+		font-size: 28px;
+		font-weight: 800;
+		letter-spacing: -0.5px;
+		color: var(--text);
+		margin-bottom: -24px;
+		padding-top: 16px;
+		border-top: 1px solid rgba(0, 0, 0, 0.12);
+	}
 	.news-card {
 		background: #ffffff;
 		border-radius: 16px;

@@ -38,6 +38,8 @@
  * @property {string} [imageBackdrop]
  * @property {string} [imagePosition]
  * @property {'bottom'} [imageLayout]
+ * @property {boolean} [past] true for events that have already happened. The
+ *   first one in the array order gets the "Past events" heading above it.
  * @property {string[]} body
  * @property {boolean} [allowHtml]
  * @property {string[]} [clinicians]
@@ -46,7 +48,7 @@
 
 /** @type {Event[]} */
 export const events = [
-	{
+{
 		slug: 'acupuncture-and-cupping-cpd-january-2027',
 		date: '30 January 2027',
 		category: 'Upcoming Event',
@@ -66,8 +68,30 @@ export const events = [
 			'A great opportunity to refresh clinical skills, develop confidence and enhance treatment approaches.',
 		],
 	},
-	{
+{
+		slug: 'mulligan-manual-therapy-concept-2026',
+		// Sits above the 'Past events' heading, so the card states when the next
+		// one is rather than leaving visitors to infer it from the body copy.
+		date: 'March 2027',
+		category: 'Training',
+		headline: 'Mulligan Manual Therapy Concept',
+		image: '/news/mulligan-manual-therapy-concept-2026.jpg',
+		imageAlt:
+			'Balance Performance Physiotherapy clinicians Jarryd Ferreira and Patrick O’Leary in navy club polo shirts, arms around each other’s shoulders and smiling at the camera after a Mulligan Concept training session, in front of a framed blue poster.',
+		// Same photograph as before, re-exported from the full-resolution
+		// original supplied on 2026-11-17; the previous file was a 480x502 crop.
+		imageWidth: 1170,
+		imageHeight: 1224,
+		body: [
+			'At Balance we believe better care starts with continuous learning. Every year, Balance hosts official Mulligan Concept postgraduate training, bringing expert manual therapy instruction to our own physiotherapists as well as practitioners across the surrounding area. Jarryd and Patrick attended one of the events in September.',
+			'This commitment to advanced education directly benefits your recovery. The Mulligan Concept uses gentle, hands-on techniques synchronized with your own movements to unlock stiff, painful joints in real time. Whether you are dealing with spinal discomfort, shoulder stiffness, or a stubborn sports injury, our team’s regularly updated skills mean you receive precise, painless treatments designed to restore your movement immediately and get you back to daily life with confidence.',
+			'Our next Mulligan event is being held in March 2027.',
+		],
+	},
+{
 		slug: 'wellness-meet-the-team-october-2026',
+		// Shown below the "Past events" heading on /news-events/.
+		past: true,
 		date: 'Thursday 8 October 2026, 12pm–1pm',
 		category: 'Upcoming Event',
 		headline: 'Save the date: our Meet The Team - Wellness Event',
@@ -85,25 +109,10 @@ export const events = [
 			"Because healing isn't just physical. All are welcome, and you can attend in person or virtually. To register your interest, please email admin@balancephysio.com.",
 		],
 	},
-	{
-		slug: 'mulligan-manual-therapy-concept-2026',
-		category: 'Training',
-		headline: 'Mulligan Manual Therapy Concept',
-		image: '/news/mulligan-manual-therapy-concept-2026.jpg',
-		imageAlt:
-			'Balance Performance Physiotherapy clinicians Jarryd Ferreira and Patrick O’Leary in navy club polo shirts, arms around each other’s shoulders and smiling at the camera after a Mulligan Concept training session, in front of a framed blue poster.',
-		// Same photograph as before, re-exported from the full-resolution
-		// original supplied on 2026-11-17; the previous file was a 480x502 crop.
-		imageWidth: 1170,
-		imageHeight: 1224,
-		body: [
-			'At Balance we believe better care starts with continuous learning. Every year, Balance hosts official Mulligan Concept postgraduate training, bringing expert manual therapy instruction to our own physiotherapists as well as practitioners across the surrounding area. Jarryd and Patrick attended one of the events in September.',
-			'This commitment to advanced education directly benefits your recovery. The Mulligan Concept uses gentle, hands-on techniques synchronized with your own movements to unlock stiff, painful joints in real time. Whether you are dealing with spinal discomfort, shoulder stiffness, or a stubborn sports injury, our team’s regularly updated skills mean you receive precise, painless treatments designed to restore your movement immediately and get you back to daily life with confidence.',
-			'Our next Mulligan event is being held in March 2027.',
-		],
-	},
-	{
+{
 		slug: 'st-pauls-opera-la-traviata-2026',
+		// Shown below the "Past events" heading on /news-events/.
+		past: true,
 		date: '2–4 July 2026',
 		category: 'Sponsorship',
 		headline: 'St Paul’s Opera Summer Opera Festival 2026',
