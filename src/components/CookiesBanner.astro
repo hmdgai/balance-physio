@@ -1,9 +1,26 @@
 ---
 // CookiesBanner.astro
-// Lightweight cookie consent banner. On first visit, asks user to accept or
-// reject analytics cookies. Choice persists in localStorage for 12 months.
-// Analytics scripts (GA/GTM) and the Google Ads conversion tag are only
-// loaded after explicit consent — an ads tag is not an essential cookie.
+// Cookie consent banner, wired to Google Consent Mode v2.
+//
+// Until 2026-11-19 this was a HARD GATE: no Google tag loaded at all until a
+// visitor pressed Accept. That is simple and unambiguously compliant, but it
+// makes everyone who ignores the banner completely invisible to Google — no
+// click id, no cookies, and no modelled conversions either. Google Ads
+// conversions were correspondingly low.
+//
+// Consent Mode inverts it. The tags now load on every page, but they start
+// with ad_storage, ad_user_data, ad_personalization and analytics_storage all
+// DENIED, which means they set no cookies and send only cookieless pings.
+// Pressing Accept sends a consent UPDATE and the tags start behaving normally.
+//
+// So nothing identifying is stored before consent — the promise the banner
+// makes is unchanged — but Google can model the conversions it would otherwise
+// never hear about.
+//
+// ORDER MATTERS: the dataLayer, the gtag shim and the consent DEFAULTS must
+// all exist before any Google tag loads, or the tag fires once in an unknown
+// consent state. Everything below runs in that order, synchronously, in one
+// inline script.
 const { gaId = '', gtmId = '', adsId = '' } = Astro.props;
 ---
 <div id="cookies-banner" class="cookies-banner" role="dialog" aria-live="polite" aria-label="Cookie consent" hidden>
@@ -24,9 +41,61 @@ const { gaId = '', gtmId = '', adsId = '' } = Astro.props;
 		var STORAGE_KEY = 'bp-cookie-consent';
 		var EXPIRY_DAYS = 365;
 
-		function loadAnalytics() {
-			if (window.__bpAnalyticsLoaded) return;
-			window.__bpAnalyticsLoaded = true;
+		// --- Consent Mode v2 -------------------------------------------------
+		// The shim and the defaults have to be in place before any Google tag
+		// loads, so this block runs first and synchronously.
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		window.gtag = gtag;
+
+		// The four signals a visitor's choice actually controls. Everything
+		// else stays as set in the defaults below and is never toggled.
+		var DENIED = {
+			ad_storage: 'denied',
+			ad_user_data: 'denied',
+			ad_personalization: 'denied',
+			analytics_storage: 'denied'
+		};
+		var GRANTED = {
+			ad_storage: 'granted',
+			ad_user_data: 'granted',
+			ad_personalization: 'granted',
+			analytics_storage: 'granted'
+		};
+
+		gtag('consent', 'default', {
+			ad_storage: 'denied',
+			ad_user_data: 'denied',
+			ad_personalization: 'denied',
+			analytics_storage: 'denied',
+			// Not covered by the banner's offer and never granted here.
+			personalization_storage: 'denied',
+			// The "essential cookies to make our site work" the banner already
+			// tells visitors about.
+			functionality_storage: 'granted',
+			security_storage: 'granted',
+			// Hold tags for up to 500ms so a returning visitor's stored choice
+			// is applied before anything fires. Resolved immediately below for
+			// anyone who has already chosen.
+			wait_for_update: 500
+		});
+
+		// Strip ad click identifiers from the data sent while ad_storage is
+		// denied, and keep the gclid in the URL as the visitor moves between
+		// pages so attribution survives without a cookie.
+		gtag('set', 'ads_data_redaction', true);
+		gtag('set', 'url_passthrough', true);
+
+		function updateConsent(granted) {
+			gtag('consent', 'update', granted ? GRANTED : DENIED);
+		}
+
+		// --- tag loading -----------------------------------------------------
+		// Runs on every page view now, not only after Accept. The consent state
+		// above is what decides whether these tags may store anything.
+		function loadTags() {
+			if (window.__bpTagsLoaded) return;
+			window.__bpTagsLoaded = true;
 			if (gtmId) {
 				(function (w, d, s, l, i) {
 					w[l] = w[l] || [];
@@ -48,12 +117,9 @@ const { gaId = '', gtmId = '', adsId = '' } = Astro.props;
 				s.async = true;
 				s.src = 'https://www.googletagmanager.com/gtag/js?id=' + (gaId || adsId);
 				document.head.appendChild(s);
-				window.dataLayer = window.dataLayer || [];
-				function gtag() { dataLayer.push(arguments); }
 				gtag('js', new Date());
 				if (gaId) gtag('config', gaId);
 				if (adsId) gtag('config', adsId);
-				window.gtag = gtag;
 			}
 		}
 
@@ -88,13 +154,19 @@ const { gaId = '', gtmId = '', adsId = '' } = Astro.props;
 			if (b) b.hidden = true;
 		}
 
-		// Init: if already chosen, honour the choice; otherwise show banner.
+		// Init: apply any stored choice, then load the tags either way.
+		// Someone who has not chosen yet is left on the denied defaults and
+		// sees the banner; their tags fire cookieless once wait_for_update
+		// lapses.
 		var consent = readConsent();
 		if (consent === 'accept') {
-			loadAnalytics();
-		} else if (consent === null) {
+			updateConsent(true);
+		} else if (consent === 'reject') {
+			updateConsent(false);
+		} else {
 			showBanner();
 		}
+		loadTags();
 
 		// Bind buttons
 		document.addEventListener('click', function (e) {
@@ -103,10 +175,11 @@ const { gaId = '', gtmId = '', adsId = '' } = Astro.props;
 			var action = t.getAttribute('data-cookie-action');
 			if (action === 'accept') {
 				writeConsent('accept');
-				loadAnalytics();
+				updateConsent(true);
 				hideBanner();
 			} else if (action === 'reject') {
 				writeConsent('reject');
+				updateConsent(false);
 				hideBanner();
 			} else if (action === 'reopen') {
 				// Allow Footer "Cookie settings" link to reopen the banner

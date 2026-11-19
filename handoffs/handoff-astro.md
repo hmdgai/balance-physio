@@ -396,7 +396,26 @@ Mostly **deliberate build-time fallbacks**, not dead code. Check the importer be
 
 ### GA4 and Content Security Policy
 
-The site currently sends consented GA4 requests without an enforcing HTTP or HTML-meta CSP. A live Accept All and reload check on 2026-10-26 returned HTTP 204 from `analytics.google.com/g/collect` with no browser console error. If a CSP is introduced later, every enforced `connect-src` must include both `https://analytics.google.com` and `https://*.analytics.google.com`; the wildcard does not cover the apex. Run `npm run test:ga4-csp` before deployment. That test also guards the existing consent-gated GTM/gtag loader. A new full CSP requires a separate audit of this site's maps, Trustindex, YouTube, forms, fonts, and Sanity image output.
+The site currently sends consented GA4 requests without an enforcing HTTP or HTML-meta CSP. A live Accept All and reload check on 2026-10-26 returned HTTP 204 from `analytics.google.com/g/collect` with no browser console error. If a CSP is introduced later, every enforced `connect-src` must include both `https://analytics.google.com` and `https://*.analytics.google.com`; the wildcard does not cover the apex. Run `npm run test:ga4-csp` before deployment.
+
+> **Consent Mode v2 replaced the hard gate on 2026-11-19.** Until then no
+> Google tag loaded until a visitor pressed Accept. That was simple and safe,
+> but it made everyone who ignored the banner invisible to Google — no click
+> id, no cookies, and **no modelled conversions** — which is a large part of
+> why Google Ads numbers were low.
+>
+> Now the tags load on every page with `ad_storage`, `ad_user_data`,
+> `ad_personalization` and `analytics_storage` all **denied**, so they set no
+> cookies and send only cookieless pings; Accept sends a consent `update`.
+> Nothing identifying is stored before consent, so the promise the banner
+> makes is unchanged.
+>
+> **The dataLayer, the gtag shim and the consent defaults must all exist
+> before any Google tag loads.** If that order is disturbed, the first hit of
+> every session is recorded in an unknown consent state — and nothing looks
+> broken: the tags still fire, the banner still appears, the build still
+> passes. `npm run test:ga4-csp` asserts the ordering and the denied
+> defaults for exactly that reason, and both assertions are mutation-tested. A new full CSP requires a separate audit of this site's maps, Trustindex, YouTube, forms, fonts, and Sanity image output.
 
 ```bash
 npm install
